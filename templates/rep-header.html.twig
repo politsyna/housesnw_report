@@ -1,0 +1,32 @@
+{#
+  submission
+  form
+#}
+{% set team = data.team %}
+<hr>
+Общая стоимость всех распиловок: {{data.cost_smena_sum}} руб.
+<hr>
+<div class="header-table-oplata">
+  <h5>Заработная плата работникам</h5>
+  <table class="all_tables">
+    <tr>
+      <td><strong>№</strong></td>
+      <td><strong>ФИО работника</strong></td>
+      <td><strong>Зар. плата, руб.</strong></td>
+    </tr>
+    {% for person in team %}
+    {% if person.zarplata_human %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ person.title }}</td>
+      <td>{{ person.zarplata_human }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    <tr>
+      <td> </td>
+      <td>ВСЕГО:</td>
+      <td>{{data.zarpata_vsego}}</td>
+    </tr>
+  </table>
+</div>

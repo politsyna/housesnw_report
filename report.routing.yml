@@ -1,0 +1,14 @@
+report.page:
+  path: 'report'
+  defaults:
+    _controller: '\Drupal\report\Controller\Report::report'
+    _title: 'Отчетный период'
+  requirements:
+    _permission: 'access report-form'
+
+page_itog:
+  path: 'report/itog/{start}/{end}'
+  defaults:
+    _controller: '\Drupal\report\Controller\PageItog::report'
+  requirements:
+    _permission: 'access report-form'
