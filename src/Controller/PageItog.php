@@ -16,6 +16,7 @@ class PageItog extends ControllerBase {
   public function report($start, $end) {
     $smena = $this->getSmena($start, $end);
     $source = [];
+    $nids = FALSE;
     $cost_smena_sum = 0;
     foreach ($smena as $key => $node) {
       // Делаем из поля "ссылка на команду" массив людей.
@@ -25,7 +26,9 @@ class PageItog extends ControllerBase {
         'работники' => $team,
       ];
       $id = $node->id();
-      $nids = array_keys($smena);
+      if (!empty($smena)) {
+        $nids = array_keys($smena);
+      }
       $cost_smena = $node->field_smena_cost_sum->value;
       $cost_smena_sum = $cost_smena_sum + $cost_smena;
     }
@@ -40,18 +43,25 @@ class PageItog extends ControllerBase {
     }
     $exhour = $this->getExhour($nids);
     $zarpata_vsego = 0;
-    foreach ($exhour as $key => $node_oplata) {
-      $human = $node_oplata->field_oplata_ref_team->entity;
-      if ($human) {
-        $tid = $human->id();
-        $zarplata = $node_oplata->field_oplata->value;
-        if (!isset($team[$tid]['zarplata_itogo'])) {
-          $team[$tid]['zarplata'][] = $zarplata;
-          $team[$tid]['zarplata_itogo'] = 0;
+    if ($exhour && !empty($exhour)) {
+      foreach ($exhour as $key => $node_oplata) {
+        $human = $node_oplata->field_oplata_ref_team->entity;
+        if ($human) {
+          $tid = $human->id();
+          $zarplata = $node_oplata->field_oplata->value;
+          if (!isset($team[$tid]['zarplata_itogo'])) {
+            $team[$tid]['zarplata'][] = $zarplata;
+            $team[$tid]['zarplata_itogo'] = 0;
+          }
+          $team[$tid]['zarplata_itogo'] = $team[$tid]['zarplata_itogo'] + $zarplata;
+          $team[$tid]['zarplata_human'] = number_format($team[$tid]['zarplata_itogo'], 0, ",", " ");
+          $zarpata_vsego = $zarpata_vsego + $zarplata;
         }
-        $team[$tid]['zarplata_itogo'] = $team[$tid]['zarplata_itogo'] + $zarplata;
-        $team[$tid]['zarplata_human'] = number_format($team[$tid]['zarplata_itogo'], 0, ",", " ");
-        $zarpata_vsego = $zarpata_vsego + $zarplata;
+      }
+      foreach ($team as $key => $value) {
+        if (!isset($value['zarplata_itogo'])) {
+          unset($team[$key]);
+        }
       }
     }
 
@@ -114,12 +124,15 @@ class PageItog extends ControllerBase {
    * A getOgders.
    */
   public function getExhour($nids = []) {
-    $query = \Drupal::entityQuery('node');
-    $query->condition('status', 1);
-    $query->condition('type', 'oplata');
-    $query->condition('field_oplata_ref_smena', $nids, 'IN');
-    $entity_ids = $query->execute();
-    $exhour = Node::loadMultiple($entity_ids);
+    $exhour = FALSE;
+    if (!empty($nids)) {
+      $query = \Drupal::entityQuery('node');
+      $query->condition('status', 1);
+      $query->condition('type', 'oplata');
+      $query->condition('field_oplata_ref_smena', $nids, 'IN');
+      $entity_ids = $query->execute();
+      $exhour = Node::loadMultiple($entity_ids);
+    }
     return $exhour;
   }
 
