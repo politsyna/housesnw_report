@@ -18,9 +18,16 @@ class PageItog extends ControllerBase {
     $source = [];
     $nids = FALSE;
     $cost_smena_sum = 0;
+    $kub_sum_sosna_1 = 0;
+    $kub_sum_sosna_2 = 0;
+    $kub_sum_sosna_3 = 0;
+    $kub_sum_el_1 = 0;
+    $kub_sum_el_2 = 0;
+    $kub_sum_el_3 = 0;
     foreach ($smena as $key => $node) {
       // Делаем из поля "ссылка на команду" массив людей.
       $team = $this->getSmenaTeam($node->field_smena_ref_team);
+      $vyhod_pilom = $this->getVyhodPilom($node->field_smena_ref_vyhod_pilom);
       $source = [
         'название смены' => $node->title->value,
         'работники' => $team,
@@ -31,6 +38,32 @@ class PageItog extends ControllerBase {
       }
       $cost_smena = $node->field_smena_cost_sum->value;
       $cost_smena_sum = $cost_smena_sum + $cost_smena;
+
+      foreach ($vyhod_pilom as $key => $array) {
+        $kubat = $array['кубатура'];
+        if ($array['порода'] == "Сосна") {
+          if ($array['сорт'] == "1") {
+            $kub_sum_sosna_1 = $kub_sum_sosna_1 + $kubat;
+          }
+          if ($array['сорт'] == "2") {
+            $kub_sum_sosna_2 = $kub_sum_sosna_2 + $kubat;
+          }
+          if ($array['сорт'] == "3") {
+            $kub_sum_sosna_3 = $kub_sum_sosna_3 + $kubat;
+          }
+        }
+        if ($array['порода'] == "Ель") {
+          if ($array['сорт'] == "1") {
+            $kub_sum_el_1 = $kub_sum_el_1 + $kubat;
+          }
+          if ($array['сорт'] == "2") {
+            $kub_sum_el_2 = $kub_sum_el_2 + $kubat;
+          }
+          if ($array['сорт'] == "3") {
+            $kub_sum_el_3 = $kub_sum_el_3 + $kubat;
+          }
+        }
+      }
     }
 
     $teams = $this->getTeam();
@@ -75,6 +108,12 @@ class PageItog extends ControllerBase {
       'team' => $team,
       'zarpata_vsego' => number_format($zarpata_vsego, 0, ",", " "),
       'cost_smena_sum' => number_format($cost_smena_sum, 0, ",", " "),
+      'kub_sum_sosna_1' => number_format($kub_sum_sosna_1, 3, ".", " "),
+      'kub_sum_sosna_2' => number_format($kub_sum_sosna_2, 3, ".", " "),
+      'kub_sum_sosna_3' => number_format($kub_sum_sosna_3, 3, ".", " "),
+      'kub_sum_el_1' => number_format($kub_sum_el_1, 3, ".", " "),
+      'kub_sum_el_2' => number_format($kub_sum_el_2, 3, ".", " "),
+      'kub_sum_el_3' => number_format($kub_sum_el_3, 3, ".", " "),
     ];
     $renderable['h'] = [
       '#theme' => 'report-header',
@@ -98,8 +137,28 @@ class PageItog extends ControllerBase {
       }
 
     }
-
     return $team;
+  }
+
+  /**
+   * Делаем из поля "ссылка на выход пилом" массив с инфой по пиломатериалам.
+   */
+  public function getVyhodPilom($field_smena_ref_vyhod_pilom) {
+    $vyhod_pilom = [];
+    foreach ($field_smena_ref_vyhod_pilom as $key => $value) {
+      $node_vyhod_pilom = $value->entity;
+      if ($node_vyhod_pilom) {
+        $poroda = $node_vyhod_pilom->field_poroda->entity->name->value;
+        $sort = $node_vyhod_pilom->field_sort->entity->name->value;
+        $kubat = $node_vyhod_pilom->field_pilom_kubatura->value;
+        $vyhod_pilom[] = [
+          'порода' => $poroda,
+          'сорт' => $sort,
+          'кубатура' => $kubat,
+        ];
+      }
+    }
+    return $vyhod_pilom;
   }
 
   /**

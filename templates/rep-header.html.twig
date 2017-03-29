@@ -25,8 +25,31 @@
     {% endfor %}
     <tr>
       <td> </td>
-      <td>ВСЕГО:</td>
-      <td>{{data.zarpata_vsego}}</td>
+      <td><strong>ВСЕГО:</strong></td>
+      <td><strong>{{data.zarpata_vsego}}</strong></td>
+    </tr>
+  </table>
+  <h5>Количество распиленного материала</h5>
+  <table class="all_tables">
+    <tr>
+      <td><strong>Сорт</strong></td>
+      <td><strong>Общая кубатура (Сосна)</strong></td>
+      <td><strong>Общая кубатура (Ель)</strong></td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>{{data.kub_sum_sosna_1}}</td>
+      <td>{{data.kub_sum_el_1}}</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>{{data.kub_sum_sosna_2}}</td>
+      <td>{{data.kub_sum_el_2}}</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>{{data.kub_sum_sosna_3}}</td>
+      <td>{{data.kub_sum_el_3}}</td>
     </tr>
   </table>
 </div>
