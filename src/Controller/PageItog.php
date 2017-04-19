@@ -17,13 +17,10 @@ class PageItog extends ControllerBase {
     $smena = $this->getSmena($start, $end);
     $source = [];
     $nids = FALSE;
+    $name = [];
+    $raspil = [];
+    $result = [];
     $cost_smena_sum = 0;
-    $kub_sum_sosna_1 = 0;
-    $kub_sum_sosna_2 = 0;
-    $kub_sum_sosna_3 = 0;
-    $kub_sum_el_1 = 0;
-    $kub_sum_el_2 = 0;
-    $kub_sum_el_3 = 0;
     foreach ($smena as $key => $node) {
       // Делаем из поля "ссылка на команду" массив людей.
       $team = $this->getSmenaTeam($node->field_smena_ref_team);
@@ -40,28 +37,21 @@ class PageItog extends ControllerBase {
       $cost_smena_sum = $cost_smena_sum + $cost_smena;
 
       foreach ($vyhod_pilom as $key => $array) {
-        $kubat = $array['кубатура'];
-        if ($array['порода'] == "Сосна") {
-          if ($array['сорт'] == "1") {
-            $kub_sum_sosna_1 = $kub_sum_sosna_1 + $kubat;
+        $poroda = $array['порода'];
+        $pilomat = $array['пиломатериал'];
+        $sort = $array['сорт'];
+        $raspil[$poroda][$pilomat]['сорт' . $sort][] = $array['кубатура'];
+      }
+    }
+
+    foreach ($raspil as $por => $bez_porodi) {
+      foreach ($bez_porodi as $pil => $bez_piloma) {
+        foreach ($bez_piloma as $sor => $bez_sorta) {
+          $summa_kub = 0;
+          foreach ($bez_sorta as $key => $value) {
+            $summa_kub = $summa_kub + $value;
           }
-          if ($array['сорт'] == "2") {
-            $kub_sum_sosna_2 = $kub_sum_sosna_2 + $kubat;
-          }
-          if ($array['сорт'] == "3") {
-            $kub_sum_sosna_3 = $kub_sum_sosna_3 + $kubat;
-          }
-        }
-        if ($array['порода'] == "Ель") {
-          if ($array['сорт'] == "1") {
-            $kub_sum_el_1 = $kub_sum_el_1 + $kubat;
-          }
-          if ($array['сорт'] == "2") {
-            $kub_sum_el_2 = $kub_sum_el_2 + $kubat;
-          }
-          if ($array['сорт'] == "3") {
-            $kub_sum_el_3 = $kub_sum_el_3 + $kubat;
-          }
+          $result[$por][$pil][$sor] = $summa_kub;
         }
       }
     }
@@ -108,12 +98,7 @@ class PageItog extends ControllerBase {
       'team' => $team,
       'zarpata_vsego' => number_format($zarpata_vsego, 0, ",", " "),
       'cost_smena_sum' => number_format($cost_smena_sum, 0, ",", " "),
-      'kub_sum_sosna_1' => number_format($kub_sum_sosna_1, 3, ".", " "),
-      'kub_sum_sosna_2' => number_format($kub_sum_sosna_2, 3, ".", " "),
-      'kub_sum_sosna_3' => number_format($kub_sum_sosna_3, 3, ".", " "),
-      'kub_sum_el_1' => number_format($kub_sum_el_1, 3, ".", " "),
-      'kub_sum_el_2' => number_format($kub_sum_el_2, 3, ".", " "),
-      'kub_sum_el_3' => number_format($kub_sum_el_3, 3, ".", " "),
+      'result' => $result,
     ];
     $renderable['h'] = [
       '#theme' => 'report-header',
@@ -151,10 +136,12 @@ class PageItog extends ControllerBase {
         $poroda = $node_vyhod_pilom->field_poroda->entity->name->value;
         $sort = $node_vyhod_pilom->field_sort->entity->name->value;
         $kubat = $node_vyhod_pilom->field_pilom_kubatura->value;
+        $pilom = $node_vyhod_pilom->field_pilom->entity->name->value;
         $vyhod_pilom[] = [
           'порода' => $poroda,
           'сорт' => $sort,
           'кубатура' => $kubat,
+          'пиломатериал' => $pilom,
         ];
       }
     }
@@ -172,8 +159,8 @@ class PageItog extends ControllerBase {
     $query = \Drupal::entityQuery('node');
     $query->condition('status', 1);
     $query->condition('type', 'smena');
-    $query->condition('field_smena_date', $start_norm, '>');
-    $query->condition('field_smena_date', $end_norm, '<');
+    $query->condition('field_smena_date', $start_norm, '>=');
+    $query->condition('field_smena_date', $end_norm, '<=');
     $entity_ids = $query->execute();
     $smena = Node::loadMultiple($entity_ids);
     return $smena;

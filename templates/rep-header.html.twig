@@ -32,24 +32,25 @@
   <h5>Количество распиленного материала</h5>
   <table class="all_tables">
     <tr>
-      <td><strong>Сорт</strong></td>
-      <td><strong>Общая кубатура (Сосна)</strong></td>
-      <td><strong>Общая кубатура (Ель)</strong></td>
+      <td><strong>Порода</strong></td>
+      <td><strong>Пиломатериал</strong></td>
+      <td><strong>Сорт 1</strong></td>
+      <td><strong>Сорт 2</strong></td>
+      <td><strong>Сорт 3</strong></td>
     </tr>
-    <tr>
-      <td>1</td>
-      <td>{{data.kub_sum_sosna_1}}</td>
-      <td>{{data.kub_sum_el_1}}</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>{{data.kub_sum_sosna_2}}</td>
-      <td>{{data.kub_sum_el_2}}</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>{{data.kub_sum_sosna_3}}</td>
-      <td>{{data.kub_sum_el_3}}</td>
-    </tr>
+    {% for poroda, pilomat_array in data.result %}
+      {% for pilomat, sort_array in pilomat_array %}
+        {% for sort, kub in sort_array %}
+        {% endfor %}
+      <tr>
+        <td>{{ poroda }}</td>
+        <td>{{ pilomat }}</td>
+        <td>{{ sort_array.сорт1 }}{% if not sort_array.сорт1 %}--{% endif %}</td>
+        <td>{{ sort_array.сорт2 }}{% if not sort_array.сорт2 %}--{% endif %}</td>
+        <td>{{ sort_array.сорт3 }}{% if not sort_array.сорт3 %}--{% endif %}</td>
+      </tr>
+      {% endfor %}
+    {% endfor %}
+
   </table>
 </div>
