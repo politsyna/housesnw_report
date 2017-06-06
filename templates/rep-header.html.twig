@@ -34,10 +34,14 @@
     <tr>
       <td><strong>Порода</strong></td>
       <td><strong>Пиломатериал</strong></td>
-      <td><strong>Сорт 1</strong></td>
-      <td><strong>Сорт 2</strong></td>
-      <td><strong>Сорт 3</strong></td>
+      <td><strong>Сорт 1, куб.м</strong></td>
+      <td><strong>Сорт 1, шт.</strong></td>
+      <td><strong>Сорт 2, куб.м</strong></td>
+      <td><strong>Сорт 2, шт.</strong></td>
+      <td><strong>Сорт 3, куб.м</strong></td>
+      <td><strong>Сорт 3, шт.</strong></td>
     </tr>
+    {% set  result2 = data.result2 %}
     {% for poroda, pilomat_array in data.result %}
       {% for pilomat, sort_array in pilomat_array %}
         {% for sort, kub in sort_array %}
@@ -45,12 +49,52 @@
       <tr>
         <td>{{ poroda }}</td>
         <td>{{ pilomat }}</td>
-        <td>{{ sort_array.сорт1 }}{% if not sort_array.сорт1 %}--{% endif %}</td>
-        <td>{{ sort_array.сорт2 }}{% if not sort_array.сорт2 %}--{% endif %}</td>
-        <td>{{ sort_array.сорт3 }}{% if not sort_array.сорт3 %}--{% endif %}</td>
+        <td class="text-right">{{ sort_array.сорт1 }}{% if not sort_array.сорт1 %}--{% endif %}</td>
+        <td class="text-right">{{ result2[poroda][pilomat].сорт1 }}{% if not result2[poroda][pilomat].сорт1 %}--{% endif %} </td>
+        <td class="text-right">{{ sort_array.сорт2 }}{% if not sort_array.сорт2 %}--{% endif %}</td>
+        <td class="text-right">{{ result2[poroda][pilomat].сорт2 }}{% if not result2[poroda][pilomat].сорт2 %}--{% endif %} </td>
+        <td class="text-right">{{ sort_array.сорт3 }}{% if not sort_array.сорт3 %}--{% endif %}</td>
+        <td class="text-right">{{ result2[poroda][pilomat].сорт3 }}{% if not result2[poroda][pilomat].сорт3 %}--{% endif %} </td>
       </tr>
       {% endfor %}
     {% endfor %}
-
   </table>
+
+  <h5>Количество распиленного материала</h5>
+  <table class="all_tables">
+    <tr>
+      <td><strong>Порода</strong></td>
+      <td><strong>Пиломатериал</strong></td>
+      <td><strong>В*Ш*Д (мм)</strong></td>
+      <td><strong>Сорт 1, куб.м</strong></td>
+      <td><strong>Сорт 1, шт.</strong></td>
+      <td><strong>Сорт 2, куб.м</strong></td>
+      <td><strong>Сорт 2, шт.</strong></td>
+      <td><strong>Сорт 3, куб.м</strong></td>
+      <td><strong>Сорт 3, шт.</strong></td>
+    </tr>
+
+    {% set  result3 = data.result3 %}
+    {% set  result4 = data.result4 %}
+    {% for poroda, pilomat_array in result3 %}
+      {% for pilomat, sort_array in pilomat_array %}
+        {% for sort, vxsxd_array in sort_array %}
+          {% for vxsxd, kub in vxsxd_array %}
+          <tr>
+        <td>{{ poroda }}</td>
+        <td>{{ pilomat }}</td>
+        <td>{{vxsxd}}</td>
+        <td class="text-right">{{result4[poroda][pilomat].сорт1[vxsxd]}}{% if not result4[poroda][pilomat].сорт1[vxsxd] %}--{% endif %}</td>
+        <td class="text-right">{{sort_array.сорт1[vxsxd]}}{% if not sort_array.сорт1 %}--{% endif %}</td>
+        <td class="text-right">{{result4[poroda][pilomat].сорт2[vxsxd]}}{% if not result4[poroda][pilomat].сорт2[vxsxd] %}--{% endif %}</td>
+        <td class="text-right">{{sort_array.сорт2[vxsxd]}}{% if not sort_array.сорт2 %}--{% endif %}</td>
+        <td class="text-right">{{result4[poroda][pilomat].сорт3[vxsxd]}}{% if not result4[poroda][pilomat].сорт3[vxsxd] %}--{% endif %}</td>
+        <td class="text-right">{{sort_array.сорт3[vxsxd]}}{% if not sort_array.сорт3 %}--{% endif %}</td>
+      {% endfor %}
+        {% endfor %}
+          {% endfor %}
+            {% endfor %}
+    </tr>
+  </table>
+
 </div>

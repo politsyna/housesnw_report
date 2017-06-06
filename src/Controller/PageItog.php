@@ -19,12 +19,19 @@ class PageItog extends ControllerBase {
     $nids = FALSE;
     $name = [];
     $raspil = [];
+    $raspil2 = [];
+    $raspil3 = [];
+    $raspil4 = [];
     $result = [];
+    $result2 = [];
+    $result3 = [];
+    $result4 = [];
     $cost_smena_sum = 0;
     foreach ($smena as $key => $node) {
       // Делаем из поля "ссылка на команду" массив людей.
       $team = $this->getSmenaTeam($node->field_smena_ref_team);
       $vyhod_pilom = $this->getVyhodPilom($node->field_smena_ref_vyhod_pilom);
+
       $source = [
         'название смены' => $node->title->value,
         'работники' => $team,
@@ -40,10 +47,15 @@ class PageItog extends ControllerBase {
         $poroda = $array['порода'];
         $pilomat = $array['пиломатериал'];
         $sort = $array['сорт'];
+        $vysota = $array['высота'];
+        $shirina = $array['ширина'];
+        $dlina = $array['длина'];
         $raspil[$poroda][$pilomat]['сорт' . $sort][] = $array['кубатура'];
+        $raspil2[$poroda][$pilomat]['сорт' . $sort][] = $array['количество'];
+        $raspil3[$poroda][$pilomat]['сорт' . $sort][$vysota][$shirina][$dlina][] = $array['количество'];
+        $raspil4[$poroda][$pilomat]['сорт' . $sort][$vysota][$shirina][$dlina][] = $array['кубатура'];
       }
     }
-
     foreach ($raspil as $por => $bez_porodi) {
       foreach ($bez_porodi as $pil => $bez_piloma) {
         foreach ($bez_piloma as $sor => $bez_sorta) {
@@ -51,11 +63,61 @@ class PageItog extends ControllerBase {
           foreach ($bez_sorta as $key => $value) {
             $summa_kub = $summa_kub + $value;
           }
-          $result[$por][$pil][$sor] = $summa_kub;
+          $result[$por][$pil][$sor] = number_format($summa_kub, 3, ".", "");
         }
       }
     }
-
+    foreach ($raspil2 as $por => $bez_porodi) {
+      foreach ($bez_porodi as $pil => $bez_piloma) {
+        foreach ($bez_piloma as $sor => $bez_sorta) {
+          $summa_shtuk = 0;
+          foreach ($bez_sorta as $key => $value) {
+            $summa_shtuk = $summa_shtuk + $value;
+          }
+          $result2[$por][$pil][$sor] = number_format($summa_shtuk, 0, ",", " ");
+        }
+      }
+    }
+    foreach ($raspil3 as $por => $bez_porodi) {
+      foreach ($bez_porodi as $pil => $bez_piloma) {
+        foreach ($bez_piloma as $sor => $bez_sorta) {
+          foreach ($bez_sorta as $dlin => $bez_dliny) {
+            foreach ($bez_dliny as $shir => $bez_shirin) {
+              foreach ($bez_shirin as $visot => $bez_visoty) {
+                $summa_shtuk_2 = 0;
+                foreach ($bez_visoty as $key => $value) {
+                  $summa_shtuk_2 = $summa_shtuk_2 + $value;
+                }
+                $dlin = number_format($dlin, 0, ",", "");
+                $shir = number_format($shir, 0, ",", "");
+                $visot = number_format($visot, 0, ",", "");
+                $result3[$por][$pil][$sor]["{$dlin}x{$shir}x{$visot}"] = number_format($summa_shtuk_2, 0, ",", " ");
+              }
+            }
+          }
+        }
+      }
+    }
+    foreach ($raspil4 as $por => $bez_porodi) {
+      foreach ($bez_porodi as $pil => $bez_piloma) {
+        foreach ($bez_piloma as $sor => $bez_sorta) {
+          foreach ($bez_sorta as $dlin => $bez_dliny) {
+            foreach ($bez_dliny as $shir => $bez_shirin) {
+              foreach ($bez_shirin as $visot => $bez_visoty) {
+                $summa_kub_2 = 0;
+                foreach ($bez_visoty as $key => $value) {
+                  $summa_kub_2 = $summa_kub_2 + $value;
+                }
+                $dlin = number_format($dlin, 0, ",", "");
+                $shir = number_format($shir, 0, ",", "");
+                $visot = number_format($visot, 0, ",", "");
+                $result4[$por][$pil][$sor]["{$dlin}x{$shir}x{$visot}"] = number_format($summa_kub_2, 3, ".", "");
+              }
+            }
+          }
+        }
+      }
+    }
     $teams = $this->getTeam();
     $team = [];
     foreach ($teams as $key => $node_team) {
@@ -99,6 +161,9 @@ class PageItog extends ControllerBase {
       'zarpata_vsego' => number_format($zarpata_vsego, 0, ",", " "),
       'cost_smena_sum' => number_format($cost_smena_sum, 0, ",", " "),
       'result' => $result,
+      'result2' => $result2,
+      'result3' => $result3,
+      'result4' => $result4,
     ];
     $renderable['h'] = [
       '#theme' => 'report-header',
@@ -136,12 +201,20 @@ class PageItog extends ControllerBase {
         $poroda = $node_vyhod_pilom->field_poroda->entity->name->value;
         $sort = $node_vyhod_pilom->field_sort->entity->name->value;
         $kubat = $node_vyhod_pilom->field_pilom_kubatura->value;
+        $kolvo = $node_vyhod_pilom->field_pilom_kolvo->value;
         $pilom = $node_vyhod_pilom->field_pilom->entity->name->value;
+        $visota = $node_vyhod_pilom->field_pilom_vysota->value;
+        $shirina = $node_vyhod_pilom->field_pilom_shirina->value;
+        $dlina = $node_vyhod_pilom->field_pilom_dlina->value;
         $vyhod_pilom[] = [
           'порода' => $poroda,
           'сорт' => $sort,
           'кубатура' => $kubat,
+          'количество' => $kolvo,
           'пиломатериал' => $pilom,
+          'высота' => $visota,
+          'ширина' => $shirina,
+          'длина' => $dlina,
         ];
       }
     }
