@@ -5,6 +5,8 @@
 {% set team = data.team %}
 <hr>
 Общая стоимость всех распиловок: {{data.cost_smena_sum}} руб.
+<br>
+Всего к выплате работникам: {{data.zarpata_vsego}} руб.
 <hr>
 <div class="header-table-oplata">
   <h5>Заработная плата работникам</h5>
@@ -12,40 +14,40 @@
     <tr>
       <td><strong>№</strong></td>
       <td><strong>ФИО работника</strong></td>
-      <td><strong>Зар. плата, руб.</strong></td>
+      <td><strong>Начислено, руб.</strong></td>
+      <td><strong>Штраф, руб.</strong></td>
+      <td><strong>Расход, руб.</strong></td>
+      <td><strong>К выплате, руб.</strong></td>
     </tr>
     {% for person in team %}
     {% if person.zarplata_human %}
     <tr>
       <td>{{ loop.index }}</td>
       <td>{{ person.title }}</td>
+      <td>{{person.nachisleno_human}}</td>
+      <td>{{person.shtraf_human}}</td>
+      <td>{{person.rashod_human}}</td>
       <td>{{ person.zarplata_human }}</td>
     </tr>
     {% endif %}
     {% endfor %}
-    <tr>
-      <td> </td>
-      <td><strong>ВСЕГО:</strong></td>
-      <td><strong>{{data.zarpata_vsego}}</strong></td>
-    </tr>
+
   </table>
-  <h5>Количество распиленного материала</h5>
+  <h5>Количество распиленного материала (суммарно по породам дерева)</h5>
   <table class="all_tables">
     <tr>
       <td><strong>Порода</strong></td>
       <td><strong>Пиломатериал</strong></td>
-      <td><strong>Сорт 1, куб.м</strong></td>
-      <td><strong>Сорт 1, шт.</strong></td>
-      <td><strong>Сорт 2, куб.м</strong></td>
-      <td><strong>Сорт 2, шт.</strong></td>
-      <td><strong>Сорт 3, куб.м</strong></td>
-      <td><strong>Сорт 3, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 1, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 1, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 2, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 2, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 3, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 3, шт.</strong></td>
     </tr>
     {% set  result2 = data.result2 %}
     {% for poroda, pilomat_array in data.result %}
       {% for pilomat, sort_array in pilomat_array %}
-        {% for sort, kub in sort_array %}
-        {% endfor %}
       <tr>
         <td>{{ poroda }}</td>
         <td>{{ pilomat }}</td>
@@ -64,14 +66,13 @@
   <table class="all_tables">
     <tr>
       <td><strong>Порода</strong></td>
-      <td><strong>Пиломатериал</strong></td>
       <td><strong>В*Ш*Д (мм)</strong></td>
-      <td><strong>Сорт 1, куб.м</strong></td>
-      <td><strong>Сорт 1, шт.</strong></td>
-      <td><strong>Сорт 2, куб.м</strong></td>
-      <td><strong>Сорт 2, шт.</strong></td>
-      <td><strong>Сорт 3, куб.м</strong></td>
-      <td><strong>Сорт 3, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 1, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 1, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 2, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 2, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 3, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 3, шт.</strong></td>
     </tr>
 
     {% set  result3 = data.result3 %}
@@ -82,7 +83,6 @@
           {% for vxsxd, kub in vxsxd_array %}
           <tr>
         <td>{{ poroda }}</td>
-        <td>{{ pilomat }}</td>
         <td>{{vxsxd}}</td>
         <td class="text-right">{{result4[poroda][pilomat].сорт1[vxsxd]}}{% if not result4[poroda][pilomat].сорт1[vxsxd] %}--{% endif %}</td>
         <td class="text-right">{{sort_array.сорт1[vxsxd]}}{% if not sort_array.сорт1 %}--{% endif %}</td>
@@ -90,11 +90,38 @@
         <td class="text-right">{{sort_array.сорт2[vxsxd]}}{% if not sort_array.сорт2 %}--{% endif %}</td>
         <td class="text-right">{{result4[poroda][pilomat].сорт3[vxsxd]}}{% if not result4[poroda][pilomat].сорт3[vxsxd] %}--{% endif %}</td>
         <td class="text-right">{{sort_array.сорт3[vxsxd]}}{% if not sort_array.сорт3 %}--{% endif %}</td>
+          </tr>
       {% endfor %}
         {% endfor %}
           {% endfor %}
             {% endfor %}
+  </table>
+
+  <h5>Сводная таблица по станкам</h5>
+  <table class="all_tables">
+    <tr>
+      <td><strong>Станок</strong></td>
+      <td class="text-right"><strong>Сорт 1, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 1, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 2, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 2, шт.</strong></td>
+      <td class="text-right"><strong>Сорт 3, куб.м</strong></td>
+      <td class="text-right"><strong>Сорт 3, шт.</strong></td>
     </tr>
+
+    {% set  result5 = data.result5 %}
+    {% set  result6 = data.result6 %}
+    {% for stanok, stanok_array in result6 %}
+      <tr>
+        <td>{{ stanok }}</td>
+        <td class="text-right">{{result5[stanok].сорт1}}{% if not result5[stanok].сорт1 %}--{% endif %}</td>
+        <td class="text-right">{{stanok_array.сорт1}}{% if not stanok_array.сорт1 %}--{% endif %}</td>
+        <td class="text-right">{{result5[stanok].сорт2}}{% if not result5[stanok].сорт2 %}--{% endif %}</td>
+        <td class="text-right">{{stanok_array.сорт2}}{% if not stanok_array.сорт2 %}--{% endif %}</td>
+        <td class="text-right">{{result5[stanok].сорт3}}{% if not result5[stanok].сорт3 %}--{% endif %}</td>
+        <td class="text-right">{{stanok_array.сорт3}}{% if not stanok_array.сорт3 %}--{% endif %}</td>
+      </tr>
+      {% endfor %}
   </table>
 
 </div>

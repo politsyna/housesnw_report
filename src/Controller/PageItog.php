@@ -22,10 +22,14 @@ class PageItog extends ControllerBase {
     $raspil2 = [];
     $raspil3 = [];
     $raspil4 = [];
+    $raspil5 = [];
+    $raspil6 = [];
     $result = [];
     $result2 = [];
     $result3 = [];
     $result4 = [];
+    $result5 = [];
+    $result6 = [];
     $cost_smena_sum = 0;
     foreach ($smena as $key => $node) {
       // Делаем из поля "ссылка на команду" массив людей.
@@ -43,7 +47,19 @@ class PageItog extends ControllerBase {
       $cost_smena = $node->field_smena_cost_sum->value;
       $cost_smena_sum = $cost_smena_sum + $cost_smena;
 
+      $field_stanok = $node->field_stanok;
+      $termin = $field_stanok->entity;
+
+      if (is_object($termin)) {
+        $field_name = $termin->name;
+        $stanok = $field_name->value;
+      }
+      else {
+        $stanok = "(станок не указан)";
+      }
+
       foreach ($vyhod_pilom as $key => $array) {
+        $vyhod_pilom[$key]['станок'] = $stanok;
         $poroda = $array['порода'];
         $pilomat = $array['пиломатериал'];
         $sort = $array['сорт'];
@@ -54,6 +70,8 @@ class PageItog extends ControllerBase {
         $raspil2[$poroda][$pilomat]['сорт' . $sort][] = $array['количество'];
         $raspil3[$poroda][$pilomat]['сорт' . $sort][$vysota][$shirina][$dlina][] = $array['количество'];
         $raspil4[$poroda][$pilomat]['сорт' . $sort][$vysota][$shirina][$dlina][] = $array['кубатура'];
+        $raspil5[$stanok]['сорт' . $sort][] = $array['кубатура'];
+        $raspil6[$stanok]['сорт' . $sort][] = $array['количество'];
       }
     }
     foreach ($raspil as $por => $bez_porodi) {
@@ -118,6 +136,24 @@ class PageItog extends ControllerBase {
         }
       }
     }
+    foreach ($raspil5 as $stan => $bez_stanka) {
+      foreach ($bez_stanka as $sor => $bez_sorta) {
+        $summa_kub_3 = 0;
+        foreach ($bez_sorta as $key => $value) {
+          $summa_kub_3 = $summa_kub_3 + $value;
+        }
+        $result5[$stan][$sor] = number_format($summa_kub_3, 3, ".", "");
+      }
+    }
+    foreach ($raspil6 as $stan => $bez_stanka) {
+      foreach ($bez_stanka as $sor => $bez_sorta) {
+        $summa_shtuk_3 = 0;
+        foreach ($bez_sorta as $key => $value) {
+          $summa_shtuk_3 = $summa_shtuk_3 + $value;
+        }
+        $result6[$stan][$sor] = number_format($summa_shtuk_3, 0, ".", " ");
+      }
+    }
     $teams = $this->getTeam();
     $team = [];
     foreach ($teams as $key => $node_team) {
@@ -134,12 +170,35 @@ class PageItog extends ControllerBase {
         if ($human) {
           $tid = $human->id();
           $zarplata = $node_oplata->field_oplata->value;
+          $nachisleno = $node_oplata->field_oplata_nachisleno->value;
+          $shtraf = $node_oplata->field_oplata_shtraf->value;
+          $rashod = $node_oplata->field_oplata_rashod->value;
+          $komment = $node_oplata->field_oplata_komment->value;
+
           if (!isset($team[$tid]['zarplata_itogo'])) {
             $team[$tid]['zarplata'][] = $zarplata;
             $team[$tid]['zarplata_itogo'] = 0;
           }
+          if (!isset($team[$tid]['nachisleno_itogo'])) {
+            $team[$tid]['nachisleno'][] = $nachisleno;
+            $team[$tid]['nachisleno_itogo'] = 0;
+          }
+          if (!isset($team[$tid]['shtraf_itogo'])) {
+            $team[$tid]['shtraf'][] = $shtraf;
+            $team[$tid]['shtraf_itogo'] = 0;
+          }
+          if (!isset($team[$tid]['rashod_itogo'])) {
+            $team[$tid]['rashod'][] = $rashod;
+            $team[$tid]['rashod_itogo'] = 0;
+          }
           $team[$tid]['zarplata_itogo'] = $team[$tid]['zarplata_itogo'] + $zarplata;
           $team[$tid]['zarplata_human'] = number_format($team[$tid]['zarplata_itogo'], 0, ",", " ");
+          $team[$tid]['nachisleno_itogo'] = $team[$tid]['nachisleno_itogo'] + $nachisleno;
+          $team[$tid]['nachisleno_human'] = number_format($team[$tid]['nachisleno_itogo'], 0, ",", " ");
+          $team[$tid]['shtraf_itogo'] = $team[$tid]['shtraf_itogo'] + $shtraf;
+          $team[$tid]['shtraf_human'] = number_format($team[$tid]['shtraf_itogo'], 0, ",", " ");
+          $team[$tid]['rashod_itogo'] = $team[$tid]['rashod_itogo'] + $rashod;
+          $team[$tid]['rashod_human'] = number_format($team[$tid]['rashod_itogo'], 0, ",", " ");
           $zarpata_vsego = $zarpata_vsego + $zarplata;
         }
       }
@@ -156,14 +215,19 @@ class PageItog extends ControllerBase {
       '#markup' => "Отчет с " . format_date(strtotime($start), 'custom', 'd-m-Y')
       . " по " . format_date(strtotime($end), 'custom', 'd-m-Y'),
     ];
+    ksort($result5);
+    ksort($result6);
     $data = [
       'team' => $team,
       'zarpata_vsego' => number_format($zarpata_vsego, 0, ",", " "),
       'cost_smena_sum' => number_format($cost_smena_sum, 0, ",", " "),
+      'stanok' => $stanok,
       'result' => $result,
       'result2' => $result2,
       'result3' => $result3,
       'result4' => $result4,
+      'result5' => $result5,
+      'result6' => $result6,
     ];
     $renderable['h'] = [
       '#theme' => 'report-header',
